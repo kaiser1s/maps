@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Map Downloader | 1.21.11</title>
+    <style>
+        :root {
+            --bg-dark: #121214;
+            --panel-dark: #1a1a1e;
+            --accent-blue: #3b82f6;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #2e2e38;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--panel-dark);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-bar {
+            flex: 2;
+            padding: 0.75rem 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .filter-select {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .map-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .map-card {
+            background: var(--panel-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease;
+        }
+
+        .map-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .map-thumb {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #2a2a32;
+        }
+
+        .map-info {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .map-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: var(--border-color);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .tag.version {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-blue);
+        }
+
+        .map-title {
+            font-size: 1.25rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .map-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0 0 1.25rem 0;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+
+        .download-btn {
+            display: block;
+            text-align: center;
+            background: var(--accent-blue);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .download-btn:hover {
+            background: #2563eb;
+        }
+
+        .no-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Map Downloader</h1>
+        <p>Centralized world simulator resource directory for Minecraft 1.21.11</p>
+    </header>
+
+    <div class="controls">
+        <input type="text" id="searchBox" class="search-bar" placeholder="Search worlds, creators, or simulators...">
+        <select id="categoryFilter" class="filter-select">
+            <option value="all">All Categories</option>
+            <option value="CarpetPvP">CarpetPvP</option>
+            <option value="SMP Simulator">SMP Simulator</option>
+            <option value="BoxPvP">BoxPvP</option>
+        </select>
+    </div>
+
+    <div class="map-grid" id="mapGrid">
+        </div>
+</div>
+
+<script>
+    // Replace URL with your actual raw GitHub link
+    const REPO_DATA_URL = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/maps.json';
+    
+    let mapDatabase = [];
+
+    async function loadMaps() {
+        try {
+            const response = await fetch(REPO_DATA_URL);
+            mapDatabase = await response.json();
+            renderMaps(mapDatabase);
+        } catch (error) {
+            console.error("Error loading map directory:", error);
+            document.getElementById('mapGrid').innerHTML = '<div class="no-results">Failed to load map listings directory.</div>';
+        }
+    }
+
+    function renderMaps(maps) {
+        const grid = document.getElementById('mapGrid');
+        grid.innerHTML = '';
+
+        if (maps.length === 0) {
+            grid.innerHTML = '<div class="no-results">No maps match your criteria.</div>';
+            return;
+        }
+
+        maps.forEach(map => {
+            const card = document.createElement('div');
+            card.className = 'map-card';
+            card.innerHTML = `
+                <img class="map-thumb" src="${map.thumbnail}" alt="${map.name}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\' viewBox=\'0 0 100 100\'><rect width=\'100%\' height=\'100%\' fill=\'%232e2e38\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%239ca3af\' font-size=\'10\'>No Image</text></svg>'">
+                <div class="map-info">
+                    <div class="map-tags">
+                        <span class="tag version">${map.version}</span>
+                        <span class="tag">${map.category}</span>
+                    </div>
+                    <h3 class="map-title">${map.name}</h3>
+                    <p class="map-desc">${map.description}</p>
+                    <a href="${map.download_url}" class="download-btn" download>Download World</a>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function filterMaps() {
+        const query = document.getElementById('searchBox').value.toLowerCase();
+        const category = document.getElementById('categoryFilter').value;
+
+        const filtered = mapDatabase.filter(map => {
+            const matchesSearch = map.name.toLowerCase().includes(query) || 
+                                  map.creator.toLowerCase().includes(query) || 
+                                  map.description.toLowerCase().includes(query);
+            const matchesCategory = (category === 'all' || map.category === category);
+            return matchesSearch && matchesCategory;
+        });
+
+        renderMaps(filtered);
+    }
+
+    document.getElementById('searchBox').addEventListener('input', filterMaps);
+    document.getElementById('categoryFilter').addEventListener('change', filterMaps);
+
+    // Initial lifecycle load
+    loadMaps();
+</script>
+</body>
+</html>
