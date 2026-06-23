@@ -1,0 +1,22 @@
+[
+  {
+    "id": "carpetpvp-practice-v1",
+    "name": "CarpetPvP Practice Map",
+    "version": "1.21.11",
+    "category": "CarpetPvP",
+    "creator": "AndrewCTF",
+    "description": "The official practice arena optimized for Carpet PvP bots and simulated mechanics.",
+    "download_url": "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/carpetpvp_practice.zip",
+    "thumbnail": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/images/carpetpvp.png"
+  },
+  {
+    "id": "blade-smp-arena",
+    "name": "BladeSMP Simulator Arena",
+    "version": "1.21.11",
+    "category": "SMP Simulator",
+    "creator": "Itay",
+    "description": "Custom high-saturation arena designed for BladeSMP style combat testing.",
+    "download_url": "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/bladesmp_arena.zip",
+    "thumbnail": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/images/bladesmp.png"
+  }
+]
